@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  IAM Role for Vercel OIDC Federation to invoke the ai-hype-checker
+  AgentCore Runtime (キーレス接続、staticなAWSキーをVercelに置かない).
+
+Parameters:
+  VercelOidcProviderArn:
+    Type: String
+    Default: arn:aws:iam::761018866498:oidc-provider/oidc.vercel.com/yuuki-yamashitas-projects
+    Description: 既存のVercel OIDC Provider ARN（事前作成済みなので参照のみ）
+  RoleName:
+    Type: String
+    Default: ai-hype-checker-vercel-role
+  AgentRuntimeNamePrefix:
+    Type: String
+    Default: aihypechecker
+    Description: >
+      agentcore launch で生成される Runtime 名のプレフィックス。
+      実際の agent_id はランダムサフィックス付きで確定するため、
+      IAMポリシーの Resource はプレフィックスのワイルドカードで許可する。
+
+Resources:
+  VercelRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref RoleName
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Ref VercelOidcProviderArn
+            Action: "sts:AssumeRoleWithWebIdentity"
+            Condition:
+              StringEquals:
+                "oidc.vercel.com/yuuki-yamashitas-projects:aud": "https://vercel.com/yuuki-yamashitas-projects"
+
+  AgentCoreInvokePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: ai-hype-checker-vercel-invoke
+      Roles:
+        - !Ref VercelRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: InvokeAgentRuntime
+            Effect: Allow
+            Action:
+              - bedrock-agentcore:InvokeAgentRuntime
+            Resource:
+              - !Sub "arn:aws:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:runtime/${AgentRuntimeNamePrefix}*"
+
+Outputs:
+  RoleArn:
+    Value: !GetAtt VercelRole.Arn
+  OidcProviderArn:
+    Value: !Ref VercelOidcProviderArn
