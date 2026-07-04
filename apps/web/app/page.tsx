@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type { JudgeResult } from "@/lib/agentcore";
+import type { JudgeResult, Verdict } from "@/lib/agentcore";
+import { useI18n } from "@/lib/i18n-context";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 type ApiResponse = {
   status: "OK" | "ERROR";
@@ -9,11 +11,11 @@ type ApiResponse = {
   error?: string;
 };
 
-const VERDICT_STYLE: Record<string, string> = {
-  驚き屋: "bg-red-100 text-red-700 border-red-300",
-  やや誇張: "bg-yellow-100 text-yellow-700 border-yellow-300",
-  堅実: "bg-green-100 text-green-700 border-green-300",
-  判定失敗: "bg-gray-100 text-gray-600 border-gray-300",
+const VERDICT_STYLE: Record<Verdict, string> = {
+  hype: "bg-red-100 text-red-700 border-red-300",
+  exaggerated: "bg-yellow-100 text-yellow-700 border-yellow-300",
+  grounded: "bg-green-100 text-green-700 border-green-300",
+  failed: "bg-gray-100 text-gray-600 border-gray-300",
 };
 
 function scoreColor(score: number | null): string {
@@ -24,10 +26,18 @@ function scoreColor(score: number | null): string {
 }
 
 export default function Home() {
+  const { locale, t } = useI18n();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<JudgeResult | null>(null);
+
+  const verdictLabel: Record<Verdict, string> = {
+    hype: t.verdictHype,
+    exaggerated: t.verdictExaggerated,
+    grounded: t.verdictGrounded,
+    failed: t.verdictFailed,
+  };
 
   const handleSubmit = async () => {
     if (!text.trim() || loading) return;
@@ -38,11 +48,11 @@ export default function Home() {
       const res = await fetch("/api/judge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, lang: locale }),
       });
       const data: ApiResponse = await res.json();
       if (data.status === "ERROR" || !data.result) {
-        setError(data.error ?? "判定に失敗しました");
+        setError(data.error ?? t.errorGeneric);
       } else {
         setResult(data.result);
       }
@@ -56,19 +66,18 @@ export default function Home() {
   return (
     <main className="flex-1 flex flex-col items-center px-4 py-10 sm:py-16 bg-zinc-50">
       <div className="w-full max-w-xl">
-        <h1 className="text-2xl sm:text-3xl font-bold text-center">
-          AI驚き屋チェッカー
-        </h1>
-        <p className="mt-2 text-sm text-center text-gray-500">
-          X（旧Twitter）のAI関連投稿を貼り付けると、誇張・扇動表現と技術的根拠を分析して
-          「驚き屋度」を判定します。
-        </p>
+        <div className="flex justify-end mb-2">
+          <LanguageSwitcher />
+        </div>
+
+        <h1 className="text-2xl sm:text-3xl font-bold text-center">{t.appTitle}</h1>
+        <p className="mt-2 text-sm text-center text-gray-500">{t.appDescription}</p>
 
         <div className="mt-8">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="判定したい投稿の本文をここに貼り付けてください"
+            placeholder={t.placeholder}
             rows={6}
             className="w-full rounded-lg border border-gray-300 p-3 text-sm text-black focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
@@ -77,7 +86,7 @@ export default function Home() {
             disabled={loading || !text.trim()}
             className="mt-3 w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white disabled:opacity-40 hover:bg-indigo-700 transition-colors"
           >
-            {loading ? "判定中..." : "判定する"}
+            {loading ? t.submitting : t.submit}
           </button>
         </div>
 
@@ -95,20 +104,20 @@ export default function Home() {
                   {result.score ?? "-"}
                   <span className="text-base font-normal text-gray-400"> / 100</span>
                 </div>
-                <div className="text-xs text-gray-400 mt-1">驚き屋度スコア</div>
+                <div className="text-xs text-gray-400 mt-1">{t.scoreLabel}</div>
               </div>
               <span
                 className={`rounded-full border px-4 py-1.5 text-sm font-semibold ${
-                  VERDICT_STYLE[result.verdict] ?? VERDICT_STYLE["判定失敗"]
+                  VERDICT_STYLE[result.verdict] ?? VERDICT_STYLE.failed
                 }`}
               >
-                {result.verdict}
+                {verdictLabel[result.verdict] ?? result.verdict}
               </span>
             </div>
 
             {result.reasons?.length > 0 && (
               <div className="mt-6">
-                <div className="text-xs font-semibold text-gray-500 mb-2">判定理由</div>
+                <div className="text-xs font-semibold text-gray-500 mb-2">{t.reasonsLabel}</div>
                 <ul className="space-y-1.5 text-sm text-gray-700 list-disc list-inside">
                   {result.reasons.map((reason, i) => (
                     <li key={i}>{reason}</li>
@@ -119,7 +128,9 @@ export default function Home() {
 
             {result.flagged_phrases?.length > 0 && (
               <div className="mt-6">
-                <div className="text-xs font-semibold text-gray-500 mb-2">検出された煽り文句</div>
+                <div className="text-xs font-semibold text-gray-500 mb-2">
+                  {t.flaggedPhrasesLabel}
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {result.flagged_phrases.map((phrase, i) => (
                     <span

@@ -32,7 +32,7 @@ agents:
     bedrock_agentcore:
       agent_id: aihypechecker-pgOaAXEdR7
       agent_arn: arn:aws:bedrock-agentcore:us-east-1:761018866498:runtime/aihypechecker-pgOaAXEdR7
-      agent_session_id: 250dcfe3-49ed-4cd6-9009-892654133bc2
+      agent_session_id: null
     codebuild:
       project_name: bedrock-agentcore-aihypechecker-builder
       execution_role: arn:aws:iam::761018866498:role/AmazonBedrockAgentCoreSDKCodeBuild-us-east-1-36a50f870b

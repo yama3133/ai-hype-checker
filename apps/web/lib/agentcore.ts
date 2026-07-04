@@ -30,9 +30,11 @@ function client(): BedrockAgentCoreClient {
   return _client;
 }
 
+export type Verdict = "hype" | "exaggerated" | "grounded" | "failed";
+
 export interface JudgeResult {
   score: number | null;
-  verdict: string;
+  verdict: Verdict;
   reasons: string[];
   flagged_phrases: string[];
 }
@@ -74,11 +76,11 @@ async function readResponseBody(response: unknown): Promise<string> {
   return new TextDecoder().decode(merged);
 }
 
-export async function judgePost(text: string): Promise<InvokeResult> {
+export async function judgePost(text: string, lang: string = "ja"): Promise<InvokeResult> {
   if (!AGENT_RUNTIME_ARN) {
     return { status: "ERROR", error: "AI_HYPE_CHECKER_RUNTIME_ARN 未設定" };
   }
-  const body = new TextEncoder().encode(JSON.stringify({ text }));
+  const body = new TextEncoder().encode(JSON.stringify({ text, lang }));
   const runtimeSessionId = `web-${crypto.randomUUID()}-${Date.now()}`;
   try {
     const cmd = new InvokeAgentRuntimeCommand({
