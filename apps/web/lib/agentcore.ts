@@ -44,8 +44,16 @@ export interface InvokeResult {
 }
 
 async function readResponseBody(response: unknown): Promise<string> {
-  const chunks: Uint8Array[] = [];
+  // AWS SDK の streaming blob payload は実行環境ごとに実体が異なる
+  // (Web ReadableStream / Node.js Readable / Uint8Array)。
+  // @smithy/util-stream が生やす transformToString() が環境差を吸収してくれる。
+  const withHelper = response as { transformToString?: (encoding?: string) => Promise<string> };
+  if (typeof withHelper.transformToString === "function") {
+    return withHelper.transformToString("utf-8");
+  }
+
   const maybeStream = response as { getReader?: () => unknown };
+  const chunks: Uint8Array[] = [];
   if (typeof maybeStream.getReader === "function") {
     const reader = (response as ReadableStream<Uint8Array>).getReader();
     for (;;) {
