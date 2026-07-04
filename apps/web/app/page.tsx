@@ -39,6 +39,8 @@ export default function Home() {
     failed: t.verdictFailed,
   };
 
+  const isAlert = result != null && result.score != null && result.score > 70;
+
   const handleSubmit = async () => {
     if (!text.trim() || loading) return;
     setLoading(true);
@@ -64,14 +66,28 @@ export default function Home() {
   };
 
   return (
-    <main className="flex-1 flex flex-col items-center px-4 py-10 sm:py-16 bg-zinc-50">
+    <main
+      className={`flex-1 flex flex-col items-center px-4 py-10 sm:py-16 transition-colors duration-500 ${
+        isAlert ? "bg-red-600" : "bg-zinc-50"
+      }`}
+    >
       <div className="w-full max-w-xl">
         <div className="flex justify-end mb-2">
           <LanguageSwitcher />
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-bold text-center">{t.appTitle}</h1>
-        <p className="mt-2 text-sm text-center text-gray-500">{t.appDescription}</p>
+        <h1
+          className={`text-2xl sm:text-3xl font-bold text-center ${
+            isAlert ? "text-white" : "text-black"
+          }`}
+        >
+          {t.appTitle}
+        </h1>
+        <p
+          className={`mt-2 text-sm text-center ${isAlert ? "text-red-50" : "text-gray-500"}`}
+        >
+          {t.appDescription}
+        </p>
 
         <div className="mt-8">
           <textarea
