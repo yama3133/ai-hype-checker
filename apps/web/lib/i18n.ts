@@ -20,6 +20,11 @@ interface Dict {
   verdictFailed: string;
   reasonsLabel: string;
   flaggedPhrasesLabel: string;
+  factCheckLabel: string;
+  factSupported: string;
+  factUnsupported: string;
+  factUnverified: string;
+  sourcesLabel: string;
   errorGeneric: string;
   language: string;
 }
@@ -39,6 +44,11 @@ export const DICTIONARIES: Record<Locale, Dict> = {
     verdictFailed: "判定失敗",
     reasonsLabel: "判定理由",
     flaggedPhrasesLabel: "検出された煽り文句",
+    factCheckLabel: "ファクトチェック（Web検索）",
+    factSupported: "裏付けあり",
+    factUnsupported: "根拠なし・矛盾",
+    factUnverified: "裏付け未確認",
+    sourcesLabel: "出典",
     errorGeneric: "判定に失敗しました",
     language: "言語",
   },
@@ -56,6 +66,11 @@ export const DICTIONARIES: Record<Locale, Dict> = {
     verdictFailed: "Failed",
     reasonsLabel: "Reasons",
     flaggedPhrasesLabel: "Flagged phrases",
+    factCheckLabel: "Fact check (web search)",
+    factSupported: "Supported",
+    factUnsupported: "Unsupported",
+    factUnverified: "Unverified",
+    sourcesLabel: "Sources",
     errorGeneric: "Failed to check this post",
     language: "Language",
   },

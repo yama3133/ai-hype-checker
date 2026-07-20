@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { JudgeResult, Verdict } from "@/lib/agentcore";
+import type { ClaimVerdict, JudgeResult, Verdict } from "@/lib/agentcore";
 import { useI18n } from "@/lib/i18n-context";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { ClaimsDonut, ScoreGauge } from "@/components/ResultCharts";
 
 type ApiResponse = {
   status: "OK" | "ERROR";
@@ -18,11 +19,21 @@ const VERDICT_STYLE: Record<Verdict, string> = {
   failed: "bg-gray-100 text-gray-600 border-gray-300",
 };
 
-function scoreColor(score: number | null): string {
-  if (score === null) return "#9ca3af";
-  if (score >= 70) return "#dc2626";
-  if (score >= 40) return "#d97706";
-  return "#16a34a";
+const CLAIM_VERDICT_STYLE: Record<ClaimVerdict, string> = {
+  supported: "bg-teal-50 text-teal-700 border-teal-300",
+  unsupported: "bg-red-50 text-red-700 border-red-300",
+  unverified: "bg-gray-100 text-gray-600 border-gray-300",
+};
+
+// LLM由来のURLはhttp/https以外をリンク化しない（javascript:等の注入対策）
+function safeHttpUrl(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:" ? url : null;
+  } catch {
+    return null;
+  }
 }
 
 export default function Home() {
@@ -38,6 +49,14 @@ export default function Home() {
     grounded: t.verdictGrounded,
     failed: t.verdictFailed,
   };
+
+  const claimVerdictLabel: Record<ClaimVerdict, string> = {
+    supported: t.factSupported,
+    unsupported: t.factUnsupported,
+    unverified: t.factUnverified,
+  };
+
+  const claims = result?.fact_check?.claims ?? [];
 
   const isAlert = result != null && result.score != null && result.score > 70;
 
@@ -116,11 +135,12 @@ export default function Home() {
           <div className="mt-8 rounded-xl border border-gray-200 bg-white p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-4xl font-bold" style={{ color: scoreColor(result.score) }}>
-                  {result.score ?? "-"}
-                  <span className="text-base font-normal text-gray-400"> / 100</span>
-                </div>
-                <div className="text-xs text-gray-400 mt-1">{t.scoreLabel}</div>
+                {result.score !== null ? (
+                  <ScoreGauge score={result.score} />
+                ) : (
+                  <div className="text-4xl font-bold text-gray-400">-</div>
+                )}
+                <div className="text-xs text-gray-400 mt-1 text-center w-36">{t.scoreLabel}</div>
               </div>
               <span
                 className={`rounded-full border px-4 py-1.5 text-sm font-semibold ${
@@ -155,6 +175,59 @@ export default function Home() {
                     >
                       {phrase}
                     </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {claims.length > 0 && (
+              <div className="mt-6">
+                <div className="text-xs font-semibold text-gray-500 mb-2">{t.factCheckLabel}</div>
+                <ClaimsDonut claims={claims} />
+                <div className="mt-3 space-y-3">
+                  {claims.map((c, i) => (
+                    <div key={i} className="rounded-lg border border-gray-200 p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="text-sm text-gray-800">{c.claim}</div>
+                        <span
+                          className={`shrink-0 rounded-full border px-3 py-0.5 text-xs font-semibold ${
+                            CLAIM_VERDICT_STYLE[c.verdict] ?? CLAIM_VERDICT_STYLE.unverified
+                          }`}
+                        >
+                          {claimVerdictLabel[c.verdict] ?? c.verdict}
+                        </span>
+                      </div>
+                      {c.note && <p className="mt-1.5 text-xs text-gray-500">{c.note}</p>}
+                      {c.sources?.length > 0 && (
+                        <div className="mt-2">
+                          <div className="text-[10px] font-semibold text-gray-400 mb-1">
+                            {t.sourcesLabel}
+                          </div>
+                          <ul className="space-y-0.5">
+                            {c.sources.map((s, j) => {
+                              const href = safeHttpUrl(s.url);
+                              return (
+                                <li key={j} className="text-xs truncate">
+                                  {href ? (
+                                    <a
+                                      href={href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-indigo-600 hover:underline"
+                                    >
+                                      {s.title || href}
+                                    </a>
+                                  ) : (
+                                    <span className="text-gray-600">{s.title}</span>
+                                  )}
+                                  {s.date && <span className="text-gray-400"> — {s.date}</span>}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>

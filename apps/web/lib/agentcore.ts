@@ -32,11 +32,27 @@ function client(): BedrockAgentCoreClient {
 
 export type Verdict = "hype" | "exaggerated" | "grounded" | "failed";
 
+export type ClaimVerdict = "supported" | "unsupported" | "unverified";
+
+export interface FactCheckSource {
+  title: string | null;
+  url: string | null;
+  date: string | null;
+}
+
+export interface FactCheckClaim {
+  claim: string;
+  verdict: ClaimVerdict;
+  note: string;
+  sources: FactCheckSource[];
+}
+
 export interface JudgeResult {
   score: number | null;
   verdict: Verdict;
   reasons: string[];
   flagged_phrases: string[];
+  fact_check?: { claims: FactCheckClaim[] };
 }
 
 export interface InvokeResult {
