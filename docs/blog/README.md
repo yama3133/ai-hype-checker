@@ -60,7 +60,7 @@ AgentCore Gateway Web Search Toolの東京リージョン(ap-northeast-1)対応�
 - [ ] Builder Center側はTitle/Description/カバー画像・タグをUI側で設定する(上記の値を使用)
 - [ ] Qiitaはタグ(AWS, Bedrock, AgentCore, 生成AI等)をUI側で設定する
 
-## アプリ概要+根拠密度チェックの穴とファクトチェック追加の経緯記事(Qiita日本語のみ、2026-08-29、Qiita未投稿につき初見読者向けにアプリ紹介も統合)
+## アプリ概要+根拠密度チェックの穴とファクトチェック追加の経緯記事(Qiita日本語のみ、2026-08-29投稿完了)
 
 初回リリース記事(アプリの概要・構成・元々の2ツール・日英UI/赤画面演出)と、`check_evidence_density`がURL・モデル名・数値の「有無」しか見ておらず内容の真偽を判定していなかった穴の発見〜Web検索ファクトチェック機能(fact_check、出典の捏造防止、プロンプトインジェクション対策)追加までの経緯を、1本のQiita記事にまとめた。捏造投稿(架空の「Claude Opus 5.2」)で実際に検証しながら説明している。本文中に画像は埋め込んでいない([[feedback-no-thumbnail-embedding]]踏襲、qiita-tokyo.mdと同じ方針)。
 
@@ -70,7 +70,6 @@ AgentCore Gateway Web Search Toolの東京リージョン(ap-northeast-1)対応�
 - `assets/flow-overview-ja.jpg` — 判定フロー図。投稿貼り付けから判定、スコア70点超で画面が赤くなる分岐までを図示
 - `assets/icons/` — AWS公式Architecture Icons(Amazon Bedrock、Amazon Bedrock AgentCore、AWS IAM等)とResource Icons(Client、Globe、Magnifying-Glass)の実物SVG/PNG。次の構成図作成でも再利用可能
 
-### この記事、投稿前のTODO
+### この記事、投稿状況
 
-- [ ] Qiitaはタグ(AWS, Bedrock, AgentCore, 生成AI等)をUI側で設定する
-- [ ] 構成図・フロー図は本文に埋め込まず、Qiita投稿画面から別途手動で貼り付ける(貼り付け先は本人の判断)
+Qiita投稿完了(2026-08-29、本人確認)。公開URLは未確認。
