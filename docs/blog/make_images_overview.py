@@ -283,13 +283,26 @@ def draw_flow() -> None:
     left_x = 90
     right_x = W - 90 - box_w
 
-    diag_arrow(draw, (dx0, (dy0 + dy1) // 2), (left_x + box_w // 2, branch_top), color=RED, width=4)
-    diag_arrow(draw, (dx1, (dy0 + dy1) // 2), (right_x + box_w // 2, branch_top), color=GREEN, width=4)
+    diaMidY = (dy0 + dy1) // 2
+    leftEndX = left_x + box_w // 2
+    rightEndX = right_x + box_w // 2
+    diag_arrow(draw, (dx0, diaMidY), (leftEndX, branch_top), color=RED, width=4)
+    diag_arrow(draw, (dx1, diaMidY), (rightEndX, branch_top), color=GREEN, width=4)
 
-    lx_label = (dx0 + left_x + box_w // 2) // 2
-    draw.text((lx_label - 20, (dy0 + dy1) // 2 + (branch_top - (dy0 + dy1) // 2) // 2 - 30), "超えた", font=font(JA_BOLD, 20), fill=RED)
-    rx_label = (dx1 + right_x + box_w // 2) // 2
-    draw.text((rx_label - 20, (dy0 + dy1) // 2 + (branch_top - (dy0 + dy1) // 2) // 2 - 30), "超えない", font=font(JA_BOLD, 20), fill=GREEN)
+    # ラベルは斜め矢印から離した位置に、線を挟んで外側に配置する(右揃え/左揃えで線をまたがせない)
+    t = 0.42
+    label_y = diaMidY + (branch_top - diaMidY) * t
+    margin = 30
+    f_branch = font(JA_BOLD, 20)
+
+    left_line_x = dx0 + (leftEndX - dx0) * t
+    left_text = "超えた"
+    ltw = text_w(draw, left_text, f_branch)
+    draw.text((left_line_x - margin - ltw, label_y - 14), left_text, font=f_branch, fill=RED)
+
+    right_line_x = dx1 + (rightEndX - dx1) * t
+    right_text = "超えない"
+    draw.text((right_line_x + margin, label_y - 14), right_text, font=f_branch, fill=GREEN)
 
     # 分岐後のボックス
     bh = 220
