@@ -60,9 +60,9 @@ AgentCore Gateway Web Search Toolの東京リージョン(ap-northeast-1)対応�
 - [ ] Builder Center側はTitle/Description/カバー画像・タグをUI側で設定する(上記の値を使用)
 - [ ] Qiitaはタグ(AWS, Bedrock, AgentCore, 生成AI等)をUI側で設定する
 
-## 根拠密度チェックの穴とファクトチェック追加の経緯記事(Qiita日本語のみ、2026-08-29)
+## アプリ概要+根拠密度チェックの穴とファクトチェック追加の経緯記事(Qiita日本語のみ、2026-08-29、Qiita未投稿につき初見読者向けにアプリ紹介も統合)
 
-`check_evidence_density`がURL・モデル名・数値の「有無」しか見ておらず、内容の真偽を判定していなかった穴を、実際に捏造投稿(架空の「Claude Opus 5.2」)で検証しながら説明し、Web検索ファクトチェック機能(fact_check、出典の捏造防止、プロンプトインジェクション対策)を追加した経緯をまとめた記事。本文中に画像は埋め込んでいない([[feedback-no-thumbnail-embedding]]踏襲、qiita-tokyo.mdと同じ方針)。
+初回リリース記事(アプリの概要・構成・元々の2ツール・日英UI/赤画面演出)と、`check_evidence_density`がURL・モデル名・数値の「有無」しか見ておらず内容の真偽を判定していなかった穴の発見〜Web検索ファクトチェック機能(fact_check、出典の捏造防止、プロンプトインジェクション対策)追加までの経緯を、1本のQiita記事にまとめた。捏造投稿(架空の「Claude Opus 5.2」)で実際に検証しながら説明している。本文中に画像は埋め込んでいない([[feedback-no-thumbnail-embedding]]踏襲、qiita-tokyo.mdと同じ方針)。
 
 - `ja/qiita-factcheck-gap.md` — Qiita投稿用(front matterなし、日本語)。タイトル: `「モデル名とURLさえ書けば堅実判定」だったAI驚き屋発見器に、本物のファクトチェックを足した`
 - `make_images_overview.py` — この記事に添える構成図・フロー図(いずれも日本語・JPG)を生成するスクリプト。AWS公式Architecture Icons(実物、docs/blog/assets/icons/に配置)を使用。`uv run --with pillow python3 make_images_overview.py`で再生成可能
